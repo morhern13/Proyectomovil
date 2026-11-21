@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Candace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/app.css" />
+</head>
+<body class="bg-slate-50 font-sans antialiased">
+  <div id="app" x-data="app()">
+    <!-- Loading screen -->
+    <div x-show="loading" class="fixed inset-0 z-50 flex items-center justify-center bg-white">
+      <div class="flex flex-col items-center gap-4">
+        <div class="h-12 w-12 animate-spin rounded-full border-4 border-candace-200 border-t-candace-600"></div>
+        <span class="text-lg font-medium text-candace-700">Cargando Candace...</span>
+      </div>
+    </div>
+
+    <!-- Auth pages -->
+    <template x-if="!auth.token && !loading">
+      <div class="min-h-screen">
+        <div x-show="page === 'login'" x-data="loginForm">
+          <div x-html="pages.login" class="contents"></div>
+        </div>
+        <div x-show="page === 'register'" x-data="registerForm">
+          <div x-html="pages.register" class="contents"></div>
+        </div>
+      </div>
+    </template>
+
+    <!-- App layout -->
+    <template x-if="auth.token && !loading">
+      <div class="flex h-screen overflow-hidden">
+        <aside class="sidebar" :class="{'w-64': sidebarOpen, 'w-16': !sidebarOpen}">
+          <div class="flex h-full flex-col bg-candace-800">
+            <div class="flex h-16 items-center justify-between px-4 border-b border-candace-700">
+              <div x-show="sidebarOpen" class="flex items-center gap-2">
+                <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gold-500 text-candace-900 font-bold text-sm">C</div>
+                <span class="text-lg font-bold text-white">Candace</span>
+              </div>
+              <button @click="sidebarOpen = !sidebarOpen" class="text-candace-200 hover:text-white p-1 rounded">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" x-show="sidebarOpen"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" x-show="!sidebarOpen"></path>
+                </svg>
+              </button>
+            </div>
+            <nav class="flex-1 overflow-y-auto py-4 px-2 space-y-1">
+              <template x-for="item in navItems" :key="item.id">
+                <a href="#" @click.prevent="navigate(item.id)"
+                  :class="{'bg-candace-700 text-white': page === item.id, 'text-candace-200 hover:bg-candace-700 hover:text-white': page !== item.id}"
+                  class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors duration-150 text-sm font-medium"
+                  :title="!sidebarOpen ? item.label : ''">
+                  <span x-html="item.icon" class="h-5 w-5 flex-shrink-0"></span>
+                  <span x-show="sidebarOpen"><span x-text="item.label"></span></span>
+                </a>
+              </template>
+            </nav>
+            <div class="border-t border-candace-700 p-4">
+              <div class="flex items-center gap-3">
+                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-candace-600 text-white text-sm font-medium">
+                  <span x-text="auth.user?.name?.charAt(0) || 'U'"></span>
+                </div>
+                <div x-show="sidebarOpen" class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-white truncate" x-text="auth.user?.name"></p>
+                  <p class="text-xs text-candace-300 capitalize" x-text="auth.user?.role"></p>
+                </div>
+                <button @click="logout()" class="text-candace-300 hover:text-white p-1 rounded" title="Cerrar sesión">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto bg-slate-50">
+          <header class="sticky top-0 z-10 bg-white border-b border-slate-200 px-6 py-3">
+            <div class="flex items-center justify-between">
+              <h1 class="text-xl font-semibold text-slate-800" x-text="pageTitle"></h1>
+              <div class="flex items-center gap-3">
+                <span class="text-sm text-slate-500" x-text="new Date().toLocaleDateString('es-DO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })"></span>
+              </div>
+            </div>
+          </header>
+          <div class="p-6">
+            <div x-show="page === 'dashboard'" x-data="dashboardPage" x-init="init">
+              <div x-html="pages.dashboard" class="contents"></div>
+            </div>
+            <div x-show="page === 'products'" x-data="productsPage" x-init="init">
+              <div x-html="pages.products" class="contents"></div>
+            </div>
+            <div x-show="page === 'categories'" x-data="categoriesPage" x-init="init">
+              <div x-html="pages.categories" class="contents"></div>
+            </div>
+            <div x-show="page === 'customers'" x-data="customersPage" x-init="init">
+              <div x-html="pages.customers" class="contents"></div>
+            </div>
+            <div x-show="page === 'suppliers'" x-data="suppliersPage" x-init="init">
+              <div x-html="pages.suppliers" class="contents"></div>
+            </div>
+            <div x-show="page === 'invoices'" x-data="invoicesPage" x-init="init">
+              <div x-html="pages.invoices" class="contents"></div>
+            </div>
+            <div x-show="page === 'pos'" x-data="posPage" x-init="init">
+              <div x-html="pages.pos" class="contents"></div>
+            </div>
+            <div x-show="page === 'reports'" x-data="reportsPage" x-init="init">
+              <div x-html="pages.reports" class="contents"></div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </template>
+
+    <div class="fixed top-4 right-4 z-50 space-y-2">
+      <template x-for="(toast, i) in toasts" :key="i">
+        <div x-show="toast.show" @click="toast.show = false"
+          :class="{'bg-emerald-500': toast.type === 'success', 'bg-red-500': toast.type === 'error', 'bg-gold-500': toast.type === 'warning', 'bg-candace-600': toast.type === 'info'}"
+          class="flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-white text-sm font-medium cursor-pointer transition-all duration-300 min-w-[280px]">
+          <span x-text="toast.message"></span>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

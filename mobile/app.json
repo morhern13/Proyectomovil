@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "Candace",
+    "slug": "candace",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#f8fafc"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.candace.app"
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
+  }
+}
